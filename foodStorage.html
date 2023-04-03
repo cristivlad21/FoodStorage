@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Food Storage</title>
+</head>
+<body style="text-align: center; background-color: #333333; color: orange;">
+	<style>#foodTable {
+		border-collapse: collapse;
+		margin: auto;
+	  }
+	  
+	  #foodTable th,
+	  #foodTable td {
+		border: 5px orange;
+		padding: 10px;
+		text-align: center;
+	  }
+	  
+	  </style>
+	<h1>Food Storage</h1>
+	<form>
+		<label for="name">Name:</label>
+		<input type="text" id="name">
+		<label for="price">Price:</label>
+		<input type="number" id="price">
+		<label for="quantity">Quantity:</label>
+		<input type="number" id="quantity">
+		<label for="expiration">Expiration Date:</label>
+		<input type="date" id="expiration">
+		<button type="button" onclick="addFood()">Add Product</button>
+	</form>
+	<br>
+	<br>
+	<table id="foodTable">
+		<thead>
+			<tr>
+				<th>Name</th>
+				<th>Price</th>
+				<th>Quantity</th>
+				<th>Expiration Date</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody id="foodTableBody">
+		</tbody>
+	</table>
+	<br>
+	<br>
+	<button type="button" onclick="deleteExpiredFood()">Delete Expired Food</button>
+	<button type="button" onclick="showMoneySpentLastMonth()">Show Money Spent Last Month</button>
+
+	<div id="moneySpent"></div>
+
+	<script>
+		let foodList = [];
+
+		function addFood() {
+        let name = document.getElementById("name").value;
+        let price = document.getElementById("price").value;
+        let quantity = document.getElementById("quantity").value;
+        let expiration = document.getElementById("expiration").value;
+
+        foodList.push({name: name, price: price, quantity: quantity, expiration: expiration});
+        foodList.sort(function(a, b) {
+        let dateA = new Date(a.expiration);
+        let dateB = new Date(b.expiration);
+        return dateA - dateB;
+        });
+
+        displayFoodList();
+        }
+
+		function deleteFood(index) {
+			foodList.splice(index, 1);
+			displayFoodList();
+		}
+
+		function deleteExpiredFood() {
+			let now = new Date();
+			for (let i = foodList.length - 1; i >= 0; i--) {
+				let expirationDate = new Date(foodList[i].expiration);
+				if (expirationDate <= now) {
+					foodList.splice(i, 1);
+				}
+			}
+			displayFoodList();
+		}
+
+        function calculateMoneySpentLastMonth() {
+  			let now = new Date();
+  			let lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+  			let totalMoney = 0;
+
+  			for (let i = 0; i < foodList.length; i++) {
+    			if (now > lastMonth) {
+      			totalMoney += foodList[i].price * foodList[i].quantity;
+    			}
+  			}
+
+  			return totalMoney.toFixed(2);
+		}
+
+		function showMoneySpentLastMonth() {
+    		let totalMoney = calculateMoneySpentLastMonth();
+    		let moneySpentDiv = document.getElementById("moneySpent");
+   			moneySpentDiv.innerHTML = "Total money spent for the last month: " + totalMoney;
+  		}
+
+
+		function displayFoodList() {
+			let tableBody = document.getElementById("foodTableBody");
+			tableBody.innerHTML = "";
+			let now = new Date();
+			for (let i = 0; i < foodList.length; i++) {
+				let row = tableBody.insertRow();
+				if (new Date(foodList[i].expiration) - now <= 3 * 24 * 60 * 60 )	
+					{
+						row.style.background = "red";
+					}
+				let nameCell = row.insertCell();
+				nameCell.innerText = foodList[i].name;
+				let priceCell = row.insertCell();
+				priceCell.innerText = foodList[i].price;
+				let quantityCell = row.insertCell();
+				quantityCell.innerText = foodList[i].quantity;
+				let expirationCell = row.insertCell();
+				expirationCell.innerText = foodList[i].expiration;
+				let deleteCell = row.insertCell();
+				let deleteButton = document.createElement("button");
+				deleteButton.innerText = "Delete";
+				deleteButton.addEventListener("click", function() { deleteFood(i); });
+				deleteCell.appendChild(deleteButton);
+			}
+		}
+	</script>
+</body>
+</html>
